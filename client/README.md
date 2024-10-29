@@ -1,3 +1,63 @@
+# Todo List App Documentation
+
+## Instruments (Tech Stack)
+
+- **JavaScript**: Core language for both frontend and backend.
+- **Node.js**: Runs JavaScript on the server side.
+- **CSS (Sass)**: Styling and design aesthetics.
+- **React/JSX**: Frontend building blocks.
+- **Express**: Backend server framework.
+- **MySQL**: Database for storing tasks and user information.
+- **npm**: Dependency management.
+
+## Purpose
+
+The primary goal of this app is learning. The focus is on understanding React's concepts and principles. Building a simple todo app allows for experimenting with the basics of state, component interaction, and HTTP requests without the complexity of advanced algorithms.
+
+## Struggles (Took 10+ hours)
+
+- **JWT or Sessions**: Deciding between Session and JWT. Took 4 days to realize that session storage is not the same as server sessions.
+- **Cookie Dilemma**: Cookie wasn’t being added to the browser even though `set-cookie` was present in the header.
+
+## Authentication
+
+- **Current Status**: In progress.
+- **Goal**: Implement user authentication for sign-up and sign-in.
+
+### API Endpoints
+
+- `POST /signup`: Create a new user account.
+- `POST /signin`: Log in with existing credentials.
+- `POST /currentUser`: Gets the username through the session.
+
+## Tests
+
+- **Not Applicable**: No formal testing implemented yet.
+- **Logging in testing**
+
+## Current Todo
+
+- **Implement Cookies/Sessions**: Track if a user is logged in and route accordingly to the home page.
+- **Guest Access**: Consider adding a guest user feature.
+- **Sign In / Sign Up Pages**: Implement with React Router.
+
+## Future Improvements
+
+- **Add a Small Chat Feature**: For real-time user interaction.
+- **Renovate the Design**: Better visuals for improved UX.
+
+## Progress (Completed Tasks)
+
+- **Brainstormed Components**: Sketched out the structure of app components.
+- **Initial Design**: Established the basic layout and user interface.
+- **Interactivity**: Added functionality to add, remove, and mark tasks as done.
+- **Started Express Server**: Running at `localhost:5000`, set up a RESTful API to handle requests.
+- **Integrated Frontend and Backend**: Used Axios for HTTP requests between React and Express (similar to Python’s httpx and requests, but in JavaScript).
+- **Sign-up Functionality**: Added user records to the MySQL database, ensuring no email duplicates. Considering Firebase or Auth0 for future enhancements.
+- **Understand Express/Axios**: Almost done.
+- **Add React Router**: For navigation between pages.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -68,3 +128,4 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
