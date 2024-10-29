@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import '../Styles/Form.css'
+import './Form.css'
 const Form = () => {
     const navigate = useNavigate();
     const [isSignupUp, setIsSignupUp] = useState(false); 
@@ -16,9 +16,7 @@ const Form = () => {
 
     useEffect(() => {
         axios.post('/currentUser').then((res) => {
-                if (res.status == 200) {
                     navigate('/');
-                }
             })
             .catch((e) => console.error(e));
     }, []);
@@ -81,9 +79,11 @@ const Form = () => {
     };
 
     return (
+        <div className='formContainer'>
+            
         <div className='wraper'>
-            <div style={{ margin: '0 auto', width: '100%', height: '100px', padding: '10px', color: 'red', wordWrap: 'break-word' }}>
-                {statusInfo}
+            <div className='error'>
+               <p> {statusInfo} </p>
             </div>
             <main className="Main signin">
                 <form onSubmit={(e) => { e.preventDefault(); }}>
@@ -102,7 +102,7 @@ const Form = () => {
                         <h1
                             onClick={() => { !isSignupUp ? slideUp() : handleForm('signup'); }}
                             style={signupStyle}
-                        >
+                            >
                             {signupButtonText}
                         </h1>
                         <input value={name} onChange={(e) => setName(e.target.value)} placeholder='Name' />
@@ -111,6 +111,7 @@ const Form = () => {
                 </div>
             </main>
         </div>
+                            </div>
     );
 };
 

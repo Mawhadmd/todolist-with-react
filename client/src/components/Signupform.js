@@ -11,7 +11,7 @@ export default function Signupform()
     //change
     try{
             await axios.post('http://localhost:5000/signup',{email: email, password: pass})
-                alert(data) 
+               
                 setpass('')
                 setemail('')
      } catch(e) {

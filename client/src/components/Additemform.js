@@ -1,49 +1,55 @@
+import { useState } from "react";
+
 export default function Additemform({
-    refobject,
     Name,
+    popup,
+    setpopup,
     desc,
     time,
     setname,
     setdesc,
     settime,
     handleadd,
+    username: currentuser,
   }) {
-    function changecolor() {
-      refobject.addingform.current.style.backgroundColor = "white";
-    }
+   
+
     return (
+      
+      <div style={popup? {display: "block"}: {display: "none"}} className="popup" >
+        <div style={popup? {display: "block"}: {display: "none"}} className="popupbg" onClick={() => setpopup(false)}>
+      </div>
       <form
-        ref={refobject.addingform}
-        className="addingform"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleadd();
-        }}
+      className="addingform"
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleadd();
+      }}
       >
         <input
           id="namein"
-          ref={refobject.inputref}
           value={Name}
           onChange={(e) => {
             setname(e.target.value);
-            changecolor();
           }}
-          placeholder="Item name"
+          placeholder="Item name*"
           required
-        />
+          />
         <textarea
           value={desc}
           onChange={(e) => setdesc(e.target.value)}
           placeholder="description"
-        />
+          />
         <input
           type="date"
           min={new Date().toISOString().slice(0, 10)}
           value={time}
           onChange={(e) => settime(e.target.value)}
           required
-        />
+          />
         <button>Add</button>
       </form>
+  
+          </div>
     );
   }

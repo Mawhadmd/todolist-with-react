@@ -1,29 +1,55 @@
-import React from "react";
+import React, { useState, createContext } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.js";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import Form from "./routes/Form.js";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./routes/errorpage.js";
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App/>,
-    errorElement: <ErrorPage/>
-  },
-  {
-    path: "/sign",
-    element: <Form />
-}
-]);
 
+// Create the context
+export const UContext = createContext();
+
+function Root() {
+  
+  // Move useState hooks inside the functional component
+  const [ongoingstyle, setongoingstyle] = useState({});
+  const [turnoff, setturnoff] = useState(true);
+  const [expiredstyle, setonexpired] = useState({});
+  const [completedstyle, setcompletedstyle] = useState({});
+
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <App />,
+      errorElement: <ErrorPage />,
+    },
+    {
+      path: "/Sign",
+      element: <Form />,
+    },
+  ]);
+
+  return (
+    <UContext.Provider
+      value={{
+        ongoingstyle,
+        setongoingstyle,
+        expiredstyle,
+        setonexpired,
+        completedstyle,
+        setcompletedstyle,
+        setturnoff,
+        turnoff
+      }}
+    >
+      <RouterProvider router={router} />
+    </UContext.Provider>
+  );
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
+    <Root />
   </React.StrictMode>
 );
-
