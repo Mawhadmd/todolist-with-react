@@ -118,7 +118,7 @@ export default function Todotable({ mode, items, handleit, setpopup }) {
   return (
     <div
       onClick={() => {
-        turnoff && textboxonclick();
+        !turnoff && textboxonclick();
       }}
       className={classnamefirstdiv}
       style={boxstyles}

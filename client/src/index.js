@@ -1,10 +1,12 @@
-import React, { useState, createContext } from "react";
+import React, { useState, createContext, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.js";
 import Form from "./routes/Form.js";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./routes/errorpage.js";
+import axios from "axios";
+
 
 // Create the context
 export const UContext = createContext();
@@ -16,6 +18,11 @@ function Root() {
   const [turnoff, setturnoff] = useState(true);
   const [expiredstyle, setonexpired] = useState({});
   const [completedstyle, setcompletedstyle] = useState({});
+  const [guest,setguest] = useState()
+  useEffect(()=> {
+    const f = async ()=> axios.post('/currentUser').then(()=>{setguest(false)}).catch(()=>setguest(true))
+    f()
+  }, [guest])
 
   const router = createBrowserRouter([
     {
@@ -29,6 +36,7 @@ function Root() {
     },
   ]);
 
+
   return (
     <UContext.Provider
       value={{
@@ -39,7 +47,9 @@ function Root() {
         completedstyle,
         setcompletedstyle,
         setturnoff,
-        turnoff
+        turnoff,
+        guest,
+        setguest
       }}
     >
       <RouterProvider router={router} />

@@ -10,50 +10,83 @@ import NavBar from "./components/NavBar.js";
 import { UContext } from "./index.js";
 
 function App() {
+  const {setguest, completedstyle, ongoingstyle, expiredstyle, guest } = useContext(UContext);
   const navigate = useNavigate();
   const [currentuser, setcurrentuser] = useState("");
-  useEffect(() => {
-    axios
-      .post("/currentUser")
-      .then((res) => {
-        setcurrentuser(res.data);
-      })
-      .catch((e) => navigate("/Sign"));
-  }, []);
-  const { completedstyle, ongoingstyle, expiredstyle } = useContext(UContext);
-  const storeditem = localStorage.getItem("items");
-  const storedcompleted = localStorage.getItem("citems");
-  const storedeitems = localStorage.getItem("eitems");
   const [popup, setpopup] = useState(false);
   const [Name, setname] = useState("");
   const [desc, setdesc] = useState("");
   const [time, settime] = useState("");
-  const [items, setitems] = useState(storeditem ? JSON.parse(storeditem) : []);
-  const [completedItems, setCompletedItems] = useState(
-    storedcompleted ? JSON.parse(storedcompleted) : []
-  );
-  const [expiredItems, setExpiredItems] = useState(
-    storedeitems ? JSON.parse(storedeitems) : []);
+  const [items, setitems] = useState([]);
+  const [completedItems, setCompletedItems] = useState([]);
+  const [expiredItems, setExpiredItems] = useState([]);
+  const [dataFitched, setDataFitched] = useState(false);
   const Datenow = () => new Date().toJSON()
 
-  useEffect(
-    () => localStorage.setItem("items", JSON.stringify(items)),
-    [items]
-  );
-  useEffect(
-    () => localStorage.setItem("citems", JSON.stringify(completedItems)),
-    [completedItems]
-  );
-  useEffect(
-    () => localStorage.setItem("eitems", JSON.stringify(expiredItems)),
-    [expiredItems]
-  );
+  useEffect(()=>{
+    async function fetchdata(){
+    let isguest
+    await axios.post('/currentUser').then(()=>{isguest = false}).catch(()=> isguest = true)
+    if(isguest)
+    {
+    var storeditem =JSON.parse(localStorage.getItem("items"))
+    var storedcompleted = JSON.parse(localStorage.getItem("citems"))
+    var storedeitems = JSON.parse(localStorage.getItem("eitems"))
+    console.log(' guest')
+    }else{
+      try{
+        console.log('not guest')
+      var res1 = (await axios.post('/getsetitems',{itemtype: 'expired', mode: 'get'}))
+      var res2 = (await axios.post('/getsetitems',{itemtype: 'current', mode: 'get'}))
+      var res3 = (await axios.post('/getsetitems',{itemtype: 'completed', mode: 'get'}))
+ 
+      var storedeitems = res1.data
+      var storeditem = res2.data
+      var storedcompleted =res3.data
+
+  
+
+      }catch(e){
+        console.error(e)
+      }
+    }
+
+      
+    if(storeditem){
+      setitems(storeditem)
+    }
+    if(storedcompleted){
+      setCompletedItems(storedcompleted)
+    }
+    if(storedeitems){
+      setExpiredItems(storedeitems)
+    }
+  
+    setDataFitched(true);
+  }
+
+    fetchdata()
+    }, [])
+ 
+ useEffect(()=>{
+
+   if(dataFitched){
+    localStorage.setItem("citems", JSON.stringify(completedItems))
+    localStorage.setItem("eitems", JSON.stringify(expiredItems))
+    localStorage.setItem("items", JSON.stringify(items))
+   }
+  
+ }, [items,expiredItems,completedItems,dataFitched])
+
 
   useEffect(()=>{
-    items.forEach((item , i) => {
+    items.forEach(async (item , i) => {
       let k = new Date(item.time).getTime()
       let h = new Date().getTime()
       if(k <= h){
+        if(!guest){
+              await axios.post('/getsetitems',{itemtype: 'expired', item: expiredItems, mode: 'set'})
+        }
       let temp = [...expiredItems, items[i]]
       setExpiredItems(temp)
         handledelete(i, 'current-item')
@@ -62,11 +95,14 @@ function App() {
   }, [items])
 
 
-  function handledone(index) {
+  async function handledone(index) {
     // Move the completed item to the completedItems array
     let completedItem = items[index];
     completedItem.currentdate = Datenow();
-
+ 
+    if(!guest){
+      await axios.post('/getsetitems',{itemtype: 'completed', item: completedItem, mode: 'set'})
+    }
     setCompletedItems([...completedItems, completedItem]);
 
     // Remove the completed item from the items array
@@ -74,15 +110,16 @@ function App() {
   }
  
 
-  function handledelete(index, mode) {
-    if(mode == "current-task"){const temp = items.filter((item, i) => i !== index);  setitems(temp);}
-    if(mode == "expired-task"){const temp = expiredItems.filter((item, i) => i !== index);  setExpiredItems(temp);}
+  async function handledelete(index, mode) {
+  
+    if(mode == "current-task"){const temp = items.filter((item, i) => i !== index); if(!guest)  (await axios.post('/getsetitems',{item: items[index], mode: 'del'})); setitems(temp); }
+    if(mode == "expired-task"){const temp = expiredItems.filter((item, i) => i !== index);  if(!guest) (await axios.post('/getsetitems',{item: expiredItems[index], mode: 'del'})); setExpiredItems(temp);}
     if(mode == "completed-task")
-   { const temp = completedItems.filter((item, i) => i !== index);  setCompletedItems(temp);}
+   { const temp = completedItems.filter((item, i) => i !== index); if(!guest)  (await axios.post('/getsetitems',{item: completedItems[index], mode: 'del'})); setCompletedItems(temp);}
 
    
   }
-  function handleadd() {
+  async function  handleadd() {
     setpopup(false);
     let currentdate = Datenow();
     let hour = currentdate.split('T')[1].slice(0,5)
@@ -105,12 +142,18 @@ function App() {
       time: time.trim(),
       currentdate,
     };
-    setitems((items) => [...items, newItem]);
+    
+    let item //This mere purpose is to add the id for the item's object then return the same thing back but with an id.
+//for guests, doesn't use id
+    if(!guest)
+     item = await axios.post('/getsetitems',{itemtype: 'current', item: newItem, mode: 'set'}).data
+
+     setitems((items) => [...items, item? item: newItem]);
 
     // Clear input fields
     setname("");
     setdesc("");
-    settime("");
+    settime("")
   }
 
   return (

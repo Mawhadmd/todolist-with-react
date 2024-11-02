@@ -1,21 +1,27 @@
 import axios from "axios"
 import { useContext, useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import {UContext} from '../index.js'
 export default function NavBar({setpopup,username: currentuser}){
     const [login_out, setlogin_out] = useState('logout')
-    const  {turnoff,setturnoff, ongoingstyle, setongoingstyle,   epiredstyle, setonexpired,setcompletedstyle,completedstyle} = useContext(UContext)
+    const  {guest, turnoff,setturnoff, ongoingstyle, setongoingstyle,   epiredstyle, setonexpired,setcompletedstyle,completedstyle} = useContext(UContext)
     const [sentw, setsentw] = useState()
-   
+   useEffect(()=>{
+    if(guest){
+        setlogin_out('Login')
+    }else{
+        setlogin_out('Log out')
+    }
+   },[guest])
     useEffect(()=>{
-        if(turnoff) 
+        if(!turnoff) 
             {  setsentw('Turn Box reactivity off')
                      setongoingstyle({}) 
                      setonexpired({})
                      setcompletedstyle({})
                      
                  }
-         else if (!turnoff){
+         else if (turnoff){
             setsentw('Turn Box reactivity on')
             setongoingstyle({}) 
             setonexpired({})
@@ -33,11 +39,16 @@ export default function NavBar({setpopup,username: currentuser}){
     const navigate = useNavigate()
     
     async function handlelogout(){
+        if(login_out == 'Login'){
+            navigate('/Sign')   
+            navigate(0)
+        }
+        else{
        if( window.confirm("You sure?")){
         setlogin_out('Loading...')
         await axios.post('/logout',{},{withCredentials: true})
         navigate(0)
-    }
+    }}
     }
    
     var defaults ={
@@ -93,7 +104,7 @@ export default function NavBar({setpopup,username: currentuser}){
             <span className="Sign-Welcome">
                 {currentuser?
             <p>What's on your mind today, <span>{String(currentuser).charAt(0).toUpperCase() + String(currentuser).slice(1)}</span>
-            </p>: 'Loading'}
+            </p>: <><Link to="/Sign">Sign in</Link> <> to save your progress </></>}
         </span>
     <button className="logout" onClick={handlelogout}>{login_out}</button>
         </header>

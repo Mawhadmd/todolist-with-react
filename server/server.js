@@ -46,16 +46,77 @@ const pool = mysql.createPool({
 
 app.post("/logout", (req, res) => {
   req.session.destroy();
-  res.status(200).json({ message: "Logged out successfully" });
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
 app.post("/red", (req, res) => {
   res.redirect("/");
 });
 
+app.post("/getsetitems", async (req, res) => {
+  const username = req.session.name;
+  const item = req.body.item; // Use the item directly, avoid unnecessary stringify
+  const itemtype = req.body.itemtype;
+
+  try {
+    if (!username) return res.status(404).send("You are not logged in.");
+
+    const sqlgetid = "SELECT id FROM Users WHERE name = ?";
+    var connection = await pool.getConnection();
+
+    const [rows] = await connection.query(sqlgetid, [username]);
+    const id = rows[0]?.id; // Use optional chaining for safety
+    if (!id) return res.status(404).send("User ID not found.");
+
+    if (req.body.mode === "set") {
+      if (itemtype === "current") {
+        // Insert new item
+        const currentitem = await connection.query(
+          "INSERT INTO items (todo_item, user_id, item_type) VALUES (?, ?, ?)",
+          [JSON.stringify(item), id, itemtype]
+        );
+        const objectitem = { ...item, id: currentitem[0].insertId }; // Return inserted item
+        return res.status(200).json(objectitem);
+      } else if (["expired", "completed"].includes(itemtype)) {
+        // Update existing item
+        const objectitem = item;
+        await connection.query(
+          "UPDATE items SET item_type = ? WHERE id = ?",
+          [itemtype, objectitem.id]
+        );
+        return res.status(200).send("success");
+      }
+    } else if (req.body.mode === "get") {
+      try {
+        const items = await connection.query(
+          "SELECT todo_item, id FROM items WHERE user_id = ? AND item_type = ?",
+          [id, itemtype]
+        );
+        const arr = items[0].map(i => ({ ...i.todo_item, id: i.id })); // Use map to construct the array
+        return res.status(200).json(arr);
+      } catch (e) {
+        console.log(e);
+        return res.status(404).json(e);
+      }
+    }
+    else if (req.body.mode === "del")
+    {  console.log(item)
+        connection.query('DELETE FROM items WHERE id = ?', [item.id])
+        return res.status(200).send('Successfully deleted.')
+}
+    return res.status(400).send("Invalid request.");
+  } catch (e) {
+    console.error(e);
+    return res.status(500).send("An error occurred.");
+  } finally {
+    if (connection) connection.release(); // Ensure the connection is released
+  }
+});
+
+
 app.post("/currentUser", (req, res) => {
   if (!req.session.name) return res.status(403).json("");
-  res.status(200).json(req.session.name);
+  return res.status(200).json(req.session.name);
 });
 
 app.post("/logged", async (req, res) => {
@@ -76,17 +137,13 @@ app.post("/suplin", async (req, res) => {
     const { operation: op, name: nm, password: ps } = req.body;
     console.log(op, nm, ps);
     psstr = checkpassword.passwordStrength(ps);
-    console.log(psstr);
 
     if (psstr.id < 1 && op == "signup") {
-      return res
-        .status(200)
-        .json({
-          message: `(weak password) try adding one of each of those: 'lowercase', 'uppercase', 'symbol', 'number' and be at least 6 characters. you currently have: ${psstr.contains}`,
-        });
+      return res.status(200).json({
+        message: `(weak password) try adding one of each of those: 'lowercase', 'uppercase', 'symbol', 'number' and be at least 6 characters. you currently have: ${psstr.contains}`,
+      });
     }
-
-    if (op === "signin") {
+    async function signinf() {
       let [rows] = await connection.query(
         "SELECT * FROM Users WHERE name = ?",
         [nm]
@@ -100,11 +157,10 @@ app.post("/suplin", async (req, res) => {
         return res.status(200).json({ message: "Incorrect password" });
 
       req.session.name = nm;
-      console.log(req.session.name);
-      console.log(req.session.id);
 
       return res.status(200).json({ message: "Welcome" });
-    } else if (op === "signup") {
+    }
+    async function signupf() {
       if (ps.length < 8) {
         return res
           .status(200)
@@ -129,6 +185,12 @@ app.post("/suplin", async (req, res) => {
           .status(500)
           .json({ message: `An error occurred during signup ${e}` });
       }
+    }
+
+    if (op === "signin") {
+      await signinf();
+    } else if (op === "signup") {
+      await signupf();
     }
   } catch (e) {
     console.error(e);
