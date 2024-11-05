@@ -2,7 +2,7 @@
   "name": "todo",
   "type": "module",
   "version": "0.1.0",
-  "homepage": "https://myusername.github.io/my-app",
+  "homepage": "https://mawhadmd.github.io/todolist-with-react/",
   "proxy": "http://localhost:8080/",
   "private": true,
   "dependencies": {
