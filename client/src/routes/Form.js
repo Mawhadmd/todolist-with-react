@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './Form.css'
 const Form = () => {
     const navigate = useNavigate();
@@ -110,6 +111,7 @@ const Form = () => {
                     </form>
                 </div>
             </main>
+            <div style={{padding: '10px' }}><Link style={{textDecoration: 'none', color: 'white', cursor:'pointer'}} to="/">Continue as a guest</Link></div>
         </div>
                             </div>
     );

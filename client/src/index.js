@@ -19,10 +19,6 @@ function Root() {
   const [expiredstyle, setonexpired] = useState({});
   const [completedstyle, setcompletedstyle] = useState({});
   const [guest,setguest] = useState()
-  useEffect(()=> {
-    const f = async ()=> axios.post('/currentUser').then(()=>{setguest(false)}).catch(()=>setguest(true))
-    f()
-  }, [guest])
 
   const router = createBrowserRouter([
     {

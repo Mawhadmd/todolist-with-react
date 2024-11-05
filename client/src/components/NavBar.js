@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router-dom"
 import {UContext} from '../index.js'
 export default function NavBar({setpopup,username: currentuser}){
     const [login_out, setlogin_out] = useState('logout')
-    const  {guest, turnoff,setturnoff, ongoingstyle, setongoingstyle,   epiredstyle, setonexpired,setcompletedstyle,completedstyle} = useContext(UContext)
+    const  {setguest, guest, turnoff,setturnoff, ongoingstyle, setongoingstyle,   epiredstyle, setonexpired,setcompletedstyle,completedstyle} = useContext(UContext)
     const [sentw, setsentw] = useState()
    useEffect(()=>{
     if(guest){
@@ -12,7 +12,7 @@ export default function NavBar({setpopup,username: currentuser}){
     }else{
         setlogin_out('Log out')
     }
-   },[guest])
+   },[guest, currentuser])
     useEffect(()=>{
         if(!turnoff) 
             {  setsentw('Turn Box reactivity off')
@@ -47,7 +47,8 @@ export default function NavBar({setpopup,username: currentuser}){
        if( window.confirm("You sure?")){
         setlogin_out('Loading...')
         await axios.post('/logout',{},{withCredentials: true})
-        navigate(0)
+        setlogin_out('Login')
+        setguest(true)
     }}
     }
    

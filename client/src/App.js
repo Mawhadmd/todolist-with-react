@@ -26,13 +26,14 @@ function App() {
   useEffect(()=>{
     async function fetchdata(){
     let isguest
-    await axios.post('/currentUser').then(()=>{isguest = false}).catch(()=> isguest = true)
+    await axios.post('/currentUser').then((res)=>{isguest = false; setguest(false); setcurrentuser(res.data)}).catch(()=> {isguest = true; setguest(true); setcurrentuser(null)})
     if(isguest)
     {
     var storeditem =JSON.parse(localStorage.getItem("items"))
     var storedcompleted = JSON.parse(localStorage.getItem("citems"))
     var storedeitems = JSON.parse(localStorage.getItem("eitems"))
     console.log(' guest')
+    setDataFitched(true);
     }else{
       try{
         console.log('not guest')
@@ -62,11 +63,11 @@ function App() {
       setExpiredItems(storedeitems)
     }
   
-    setDataFitched(true);
+   
   }
 
     fetchdata()
-    }, [])
+    }, [guest])
  
  useEffect(()=>{
 
@@ -75,6 +76,7 @@ function App() {
     localStorage.setItem("eitems", JSON.stringify(expiredItems))
     localStorage.setItem("items", JSON.stringify(items))
    }
+   setDataFitched(false);
   
  }, [items,expiredItems,completedItems,dataFitched])
 
@@ -85,7 +87,7 @@ function App() {
       let h = new Date().getTime()
       if(k <= h){
         if(!guest){
-              await axios.post('/getsetitems',{itemtype: 'expired', item: expiredItems, mode: 'set'})
+              await axios.post('/getsetitems',{itemtype: 'expired', item: items[i], mode: 'set'})
         }
       let temp = [...expiredItems, items[i]]
       setExpiredItems(temp)
